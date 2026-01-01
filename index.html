@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Minecraft Remote Control</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding-top: 50px; background: #1a1a1a; color: #ecf0f1; }
+        .container { background: #2c3e50; display: inline-block; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        input { padding: 12px; margin-bottom: 20px; width: 280px; border-radius: 5px; border: 1px solid #34495e; background: #ecf0f1; font-size: 16px; }
+        .btn { padding: 15px 25px; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; margin: 10px; transition: 0.3s; }
+        .btn-start { background: #27ae60; }
+        .btn-start:hover { background: #2ecc71; transform: scale(1.05); }
+        .btn-stop { background: #c0392b; }
+        .btn-stop:hover { background: #e74c3c; transform: scale(1.05); }
+        #status { margin-top: 25px; font-size: 18px; min-height: 24px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Панель управления</h1>
+        <input type="password" id="password" placeholder="Введите пароль доступа"><br>
+        
+        <button class="btn btn-start" onclick="sendCommand('start')">ЗАПУСТИТЬ</button>
+        <button class="btn btn-stop" onclick="sendCommand('stop')">ОСТАНОВИТЬ</button>
+
+        <p id="status"></p>
+    </div>
+
+    <script>
+        async function sendCommand(action) {
+            const password = document.getElementById('password').value;
+            const statusLabel = document.getElementById('status');
+            
+            // Замените на вашу ссылку Cloudflare
+            const url = `http://localhost:5000/${action}`; 
+
+            statusLabel.innerText = action === 'start' ? "Запуск сервера..." : "Остановка сервера...";
+            statusLabel.style.color = "#f1c40f";
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Authorization': password }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    statusLabel.style.color = "#2ecc71";
+                    statusLabel.innerText = data.message;
+                } else {
+                    statusLabel.style.color = "#e74c3c";
+                    statusLabel.innerText = "Ошибка: " + data.message;
+                }
+            } catch (error) {
+                statusLabel.style.color = "#e74c3c";
+                statusLabel.innerText = "Нет связи с сервером";
+            }
+        }
+    </script>
+</body>
+</html>
