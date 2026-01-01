@@ -3,164 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Server Control</title>
+    <title>MC Control + Status</title>
     <style>
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
-            --green: #22c55e;
-            --red: #ef4444;
-            --blue: #3b82f6;
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc;
+            --green: #22c55e; --red: #ef4444; --blue: #3b82f6;
         }
-
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-
-        .container {
-            background: var(--card);
-            padding: 2.5rem;
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--text); }
-        p.subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
-
-        .input-box { text-align: left; margin-bottom: 1.5rem; }
-        label { display: block; font-size: 0.8rem; margin-bottom: 6px; color: #94a3b8; text-transform: uppercase; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: var(--card); padding: 2rem; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         
-        input {
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            background: #0f172a;
-            color: white;
-            font-size: 1rem;
-            box-sizing: border-box;
-            transition: all 0.3s;
+        /* Индикатор статуса */
+        .status-badge {
+            display: inline-flex; align-items: center; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-bottom: 20px; border: 1px solid #334155;
         }
-        input:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .online-dot { background-color: var(--green); box-shadow: 0 0 10px var(--green); }
+        .offline-dot { background-color: var(--red); }
 
-        .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-        .btn {
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.2s;
-            color: white;
-        }
-
-        .btn:active { transform: scale(0.95); }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-        .btn-start { background: var(--green); box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3); }
-        .btn-stop { background: var(--red); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
-
-        #status {
-            margin-top: 1.5rem;
-            padding: 12px;
-            border-radius: 12px;
-            background: rgba(15, 23, 42, 0.5);
-            font-size: 0.9rem;
-            min-height: 20px;
-            line-height: 1.4;
-        }
-
-        .pulse { animation: pulse-animation 2s infinite; }
-        @keyframes pulse-animation { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .btn { padding: 15px; border: none; border-radius: 12px; cursor: pointer; color: white; font-weight: bold; transition: 0.2s; }
+        .btn:disabled { opacity: 0.4; }
+        .btn-start { background: var(--green); }
+        .btn-stop { background: var(--red); }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; margin-top: 10px; box-sizing: border-box; }
+        #log { margin-top: 20px; font-size: 0.9rem; color: #94a3b8; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Minecraft Server</h1>
-    <p class="subtitle">Удаленное управление сервером</p>
-    
-    <div class="input-box">
-        <input type="password" id="pass" placeholder="Введите пароль">
+    <div id="badge" class="status-badge">
+        <span id="dot" class="dot offline-dot"></span>
+        <span id="status-text">OFFLINE</span>
     </div>
+    
+    <h1>MC Launcher</h1>
+    <input type="password" id="pass" placeholder="Пароль доступа">
 
     <div class="btns">
-        <button id="b1" class="btn btn-start" onclick="run('start')">Старт</button>
-        <button id="b2" class="btn btn-stop" onclick="run('stop')">Стоп</button>
+        <button id="b1" class="btn btn-start" onclick="run('start')">ПУСК</button>
+        <button id="b2" class="btn btn-stop" onclick="run('stop')">СТОП</button>
     </div>
 
-    <div id="status">Система готова</div>
+    <div id="log">Ожидание команд...</div>
 </div>
 
 <script>
-    // Твоя активная ссылка Cloudflare-------------------------------------------------------------------------------------------------------------------------------------
+    // ЗАМЕНИ НА СВОЮ ССЫЛКУ ИЗ CLOUDFLARE
     const API_URL = 'https://dash-dim-herbal-arms.trycloudflare.com';
 
-    // Загружаем пароль из памяти браузера
     document.getElementById('pass').value = localStorage.getItem('mc_key') || '';
 
-    async function run(cmd) {
-        const passInput = document.getElementById('pass');
-        const status = document.getElementById('status');
-        const btn1 = document.getElementById('b1');
-        const btn2 = document.getElementById('b2');
+    async function checkStatus() {
+        try {
+            const res = await fetch(`${API_URL}/status`);
+            const data = await res.json();
+            const dot = document.getElementById('dot');
+            const text = document.getElementById('status-text');
 
-        if (!passInput.value) {
-            log("Нужен пароль!", "#ef4444");
-            return;
+            if (data.status === 'online') {
+                dot.className = 'dot online-dot';
+                text.innerText = 'ONLINE';
+                text.style.color = '#22c55e';
+            } else {
+                dot.className = 'dot offline-dot';
+                text.innerText = 'OFFLINE';
+                text.style.color = '#ef4444';
+            }
+        } catch (e) {
+            document.getElementById('status-text').innerText = 'НЕТ СВЯЗИ';
         }
+    }
 
-        // Сохраняем для удобства
-        localStorage.setItem('mc_key', passInput.value);
-
-        // Блокируем кнопки
-        btn1.disabled = true;
-        btn2.disabled = true;
-        log(cmd === 'start' ? "Запускаю..." : "Останавливаю...", "#3b82f6", true);
-
+    async function run(cmd) {
+        const pass = document.getElementById('pass').value;
+        localStorage.setItem('mc_key', pass);
+        
         try {
             const res = await fetch(`${API_URL}/${cmd}`, {
                 method: 'POST',
-                headers: { 'Authorization': passInput.value }
+                headers: { 'Authorization': pass }
             });
-
             const data = await res.json();
-
-            if (res.ok) {
-                log("✅ " + data.message, "#22c55e");
-            } else {
-                log("❌ Ошибка: " + data.message, "#ef4444");
-            }
+            document.getElementById('log').innerText = data.message;
         } catch (e) {
-            log("📡 Нет связи с домашним ПК. Проверьте, запущен ли туннель!", "#ef4444");
-        } finally {
-            btn1.disabled = false;
-            btn2.disabled = false;
+            document.getElementById('log').innerText = "Ошибка сети";
         }
     }
 
-    function log(msg, color, pulsing = false) {
-        const s = document.getElementById('status');
-        s.innerText = msg;
-        s.style.color = color;
-        if (pulsing) s.classList.add('pulse');
-        else s.classList.remove('pulse');
-    }
+    // Проверять статус каждые 5 секунд
+    setInterval(checkStatus, 5000);
+    // И один раз при загрузке
+    checkStatus();
 </script>
 
 </body>
