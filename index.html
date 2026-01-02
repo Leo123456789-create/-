@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Server Panel</title>
+    <title>Aladushki server</title>
     <style>
         /* Основной фон как на макете */
         body {
@@ -136,7 +136,7 @@
 </div>
 
 <script>
-    // ТВОЯ ТЕКУЩАЯ ССЫЛКА ИЗ CLOUDFLARE
+    // ТВОЯ ТЕКУЩАЯ ССЫЛКА ИЗ CLOUDFLARE---------------------------------------------------------------------------------
     const API_URL = 'https://objective-genetics-bright-pleased.trycloudflare.com';
 
     // Загрузка сохраненного пароля
@@ -147,12 +147,12 @@
     async function run(cmd) {
         const password = passInput.value;
         if (!password) {
-            updateUI("Введите пароль!", "loading", false);
+            updateUI("Введите пароль", "loading", false);
             return;
         }
         
         localStorage.setItem('mc_password_key', password);
-        updateUI(cmd === 'start' ? "Запускаю..." : "Останавливаю...", "loading", false);
+        updateUI(cmd === 'start' ? "Запуск..." : "Остановка...", "loading", false);
 
         try {
             const res = await fetch(`${API_URL}/${cmd}`, {
@@ -178,13 +178,13 @@
             const data = await res.json();
             
             if (data.status === 'online') {
-                updateUI("Сервер работает!", "online", true);
+                updateUI("Сервер работает", "online", true);
             } else {
                 updateUI("Сервер выключен", "offline", false);
             }
         } catch (e) {
             // Если туннель упал
-            updateUI("Нет связи с ПК", "offline", false);
+            updateUI("Нет связи с сервером", "offline", false);
         }
     }
 
@@ -222,3 +222,4 @@
 
 </body>
 </html>
+
