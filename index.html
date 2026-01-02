@@ -3,98 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MC Control + Status</title>
+    <title>Minecraft Server Panel</title>
     <style>
-        :root {
-            --bg: #0f172a; --card: #1e293b; --text: #f8fafc;
-            --green: #22c55e; --red: #ef4444; --blue: #3b82f6;
+        /* Основной фон как на макете */
+        body {
+            background-color: #1a1f2b;
+            color: white;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
         }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: var(--card); padding: 2rem; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-        
-        /* Индикатор статуса */
-        .status-badge {
-            display: inline-flex; align-items: center; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-bottom: 20px; border: 1px solid #334155;
-        }
-        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-        .online-dot { background-color: var(--green); box-shadow: 0 0 10px var(--green); }
-        .offline-dot { background-color: var(--red); }
 
-        .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .btn { padding: 15px; border: none; border-radius: 12px; cursor: pointer; color: white; font-weight: bold; transition: 0.2s; }
-        .btn:disabled { opacity: 0.4; }
-        .btn-start { background: var(--green); }
-        .btn-stop { background: var(--red); }
-        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; margin-top: 10px; box-sizing: border-box; }
-        #log { margin-top: 20px; font-size: 0.9rem; color: #94a3b8; }
+        /* Центральная карточка */
+        .card {
+            background-color: #242b3d;
+            padding: 45px;
+            border-radius: 35px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        h1 { font-size: 34px; margin: 0 0 10px 0; font-weight: 700; letter-spacing: -0.5px; }
+        .subtitle { color: #7a869a; margin-bottom: 35px; font-size: 16px; font-weight: 400; }
+
+        /* Поле пароля */
+        input[type="password"] {
+            width: 100%;
+            background-color: #1a1f2b;
+            border: 1px solid #323d52;
+            padding: 16px;
+            border-radius: 14px;
+            color: white;
+            font-size: 18px;
+            margin-bottom: 25px;
+            box-sizing: border-box;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input[type="password"]:focus { border-color: #4a5a78; }
+
+        /* Контейнер для кнопок */
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: white;
+            letter-spacing: 1px;
+        }
+
+        .btn:active { transform: scale(0.96); }
+
+        .btn-start {
+            background-color: #27ae60;
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.25);
+        }
+        .btn-start:hover { background-color: #2ecc71; box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4); }
+
+        .btn-stop {
+            background-color: #e74c3c;
+            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.25);
+        }
+        .btn-stop:hover { background-color: #ff5e4d; box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4); }
+
+        /* Статус-бар внизу */
+        .status-bar {
+            background-color: #1a1f2b;
+            padding: 16px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        /* Цвета статусов */
+        .status-online { color: #2ecc71; }
+        .status-offline { color: #e74c3c; }
+        .status-loading { color: #f1c40f; }
+
+        /* Стилизация чекбокса (галочки) */
+        .custom-checkbox {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+        .checkbox-on { background-color: #2ecc71; color: #1a1f2b; font-size: 12px; }
+        .checkbox-off { border: 2px solid #323d52; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="badge" class="status-badge">
-        <span id="dot" class="dot offline-dot"></span>
-        <span id="status-text">OFFLINE</span>
-    </div>
-    
-    <h1>MC Launcher</h1>
-    <input type="password" id="pass" placeholder="Пароль доступа">
+<div class="card">
+    <h1>Minecraft Server</h1>
+    <div class="subtitle">Удаленное управление сервером</div>
 
-    <div class="btns">
-        <button id="b1" class="btn btn-start" onclick="run('start')">ПУСК</button>
-        <button id="b2" class="btn btn-stop" onclick="run('stop')">СТОП</button>
+    <input type="password" id="pass" placeholder="••••">
+
+    <div class="buttons">
+        <button id="btn-start" class="btn btn-start" onclick="run('start')">СТАРТ</button>
+        <button id="btn-stop" class="btn btn-stop" onclick="run('stop')">СТОП</button>
     </div>
 
-    <div id="log">Ожидание команд...</div>
+    <div id="status-box" class="status-bar status-offline">
+        <div id="check-icon" class="custom-checkbox checkbox-off"></div>
+        <span id="status-text">Сервер выключен</span>
+    </div>
 </div>
 
 <script>
-    // ЗАМЕНИ НА СВОЮ ССЫЛКУ ИЗ CLOUDFLARE
-    const API_URL = 'https://dash-dim-herbal-arms.trycloudflare.com';
+    // ТВОЯ ТЕКУЩАЯ ССЫЛКА ИЗ CLOUDFLARE
+    const API_URL = 'https://burner-logging-know-llc.trycloudflare.com';
 
-    document.getElementById('pass').value = localStorage.getItem('mc_key') || '';
+    // Загрузка сохраненного пароля
+    const passInput = document.getElementById('pass');
+    passInput.value = localStorage.getItem('mc_password_key') || '';
 
+    // Функция отправки команд (Старт/Стоп)
+    async function run(cmd) {
+        const password = passInput.value;
+        if (!password) {
+            updateUI("Введите пароль!", "loading", false);
+            return;
+        }
+        
+        localStorage.setItem('mc_password_key', password);
+        updateUI(cmd === 'start' ? "Запускаю..." : "Останавливаю...", "loading", false);
+
+        try {
+            const res = await fetch(`${API_URL}/${cmd}`, {
+                method: 'POST',
+                headers: { 'Authorization': password }
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                updateUI(data.message, "online", true);
+            } else {
+                updateUI(data.message, "offline", false);
+            }
+        } catch (e) {
+            updateUI("Ошибка соединения", "offline", false);
+        }
+    }
+
+    // Функция постоянной проверки статуса
     async function checkStatus() {
         try {
             const res = await fetch(`${API_URL}/status`);
             const data = await res.json();
-            const dot = document.getElementById('dot');
-            const text = document.getElementById('status-text');
-
+            
             if (data.status === 'online') {
-                dot.className = 'dot online-dot';
-                text.innerText = 'ONLINE';
-                text.style.color = '#22c55e';
+                updateUI("Сервер работает!", "online", true);
             } else {
-                dot.className = 'dot offline-dot';
-                text.innerText = 'OFFLINE';
-                text.style.color = '#ef4444';
+                updateUI("Сервер выключен", "offline", false);
             }
         } catch (e) {
-            document.getElementById('status-text').innerText = 'НЕТ СВЯЗИ';
+            // Если туннель упал
+            updateUI("Нет связи с ПК", "offline", false);
         }
     }
 
-    async function run(cmd) {
-        const pass = document.getElementById('pass').value;
-        localStorage.setItem('mc_key', pass);
+    // Вспомогательная функция для обновления дизайна
+    function updateUI(text, type, checked) {
+        const textElem = document.getElementById('status-text');
+        const boxElem = document.getElementById('status-box');
+        const checkElem = document.getElementById('check-icon');
+
+        textElem.innerText = text;
         
-        try {
-            const res = await fetch(`${API_URL}/${cmd}`, {
-                method: 'POST',
-                headers: { 'Authorization': pass }
-            });
-            const data = await res.json();
-            document.getElementById('log').innerText = data.message;
-        } catch (e) {
-            document.getElementById('log').innerText = "Ошибка сети";
+        // Сброс классов
+        boxElem.className = 'status-bar';
+        checkElem.className = 'custom-checkbox';
+
+        if (type === 'online') {
+            boxElem.classList.add('status-online');
+            checkElem.classList.add('checkbox-on');
+            checkElem.innerHTML = '✔';
+        } else if (type === 'offline') {
+            boxElem.classList.add('status-offline');
+            checkElem.classList.add('checkbox-off');
+            checkElem.innerHTML = '';
+        } else {
+            boxElem.classList.add('status-loading');
+            checkElem.classList.add('checkbox-off');
+            checkElem.innerHTML = '';
         }
     }
 
-    // Проверять статус каждые 5 секунд
+    // Опрос сервера каждые 5 секунд
     setInterval(checkStatus, 5000);
-    // И один раз при загрузке
-    checkStatus();
+    checkStatus(); // Первая проверка при загрузке
 </script>
 
 </body>
