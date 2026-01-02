@@ -3,205 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aladushki server</title>
+    <title>Aladushki server </title>
     <style>
-        body {
-            background-color: #1a1f2b;
-            color: white;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .card {
-            background-color: #242b3d;
-            padding: 40px;
-            border-radius: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            width: 400px;
-            text-align: center;
-        }
-
+        body { background-color: #1a1f2b; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background-color: #242b3d; padding: 40px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); width: 380px; text-align: center; }
         h1 { font-size: 32px; margin-bottom: 10px; font-weight: bold; }
         .subtitle { color: #7a869a; margin-bottom: 30px; font-size: 16px; }
-
-        input {
-            width: 100%;
-            background-color: #1a1f2b;
-            border: 1px solid #323d52;
-            padding: 15px;
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
-            margin-bottom: 15px;
-            box-sizing: border-box;
-            text-align: center;
-            outline: none;
-        }
-
-        .buttons {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 25px;
-            margin-top: 10px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 18px;
-            border: none;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            color: white;
-        }
-
-        .btn-start {
-            background-color: #27ae60;
-            box-shadow: 0 0 20px rgba(39, 174, 96, 0.3);
-        }
-        .btn-start:hover { background-color: #2ecc71; transform: scale(1.02); }
-
-        .btn-stop {
-            background-color: #e74c3c;
-            box-shadow: 0 0 20px rgba(231, 76, 60, 0.3);
-        }
-        .btn-stop:hover { background-color: #ff5e4d; transform: scale(1.02); }
-
-        .status-bar {
-            background-color: #1a1f2b;
-            padding: 20px;
-            border-radius: 15px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            min-height: 60px;
-        }
-
-        .status-main {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        #checkbox {
-            width: 20px;
-            height: 20px;
-            accent-color: #2ecc71;
-            margin: 0;
-        }
-
-        .players-online {
-            font-size: 14px;
-            color: #7a869a;
-            font-weight: 400;
-        }
-
+        input { width: 100%; background-color: #1a1f2b; border: 1px solid #323d52; padding: 15px; border-radius: 12px; color: white; font-size: 18px; margin-bottom: 20px; box-sizing: border-box; text-align: center; outline: none; }
+        .buttons { display: flex; gap: 20px; margin-bottom: 25px; }
+        .btn { flex: 1; padding: 18px; border: none; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; color: white; }
+        .btn-start { background-color: #27ae60; box-shadow: 0 0 20px rgba(39, 174, 96, 0.3); }
+        .btn-stop { background-color: #e74c3c; box-shadow: 0 0 20px rgba(231, 76, 60, 0.3); }
+        .status-bar { background-color: #1a1f2b; padding: 20px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .status-main { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; }
+        #checkbox { width: 20px; height: 20px; accent-color: #2ecc71; }
+        .players-row { font-size: 14px; color: #7a869a; }
+        .names-list { font-size: 12px; color: #5c667a; margin-top: 5px; font-style: italic; }
         .online { color: #2ecc71; }
         .offline { color: #e74c3c; }
-        .loading { color: #f1c40f; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>Minecraft Server</h1>
-    <div class="subtitle">Удаленное управление сервером</div>
-
-    <input type="text" id="api-url" placeholder="URL туннеля">
-    <input type="password" id="pass" placeholder="••••">
-
+    <h1>Аладушки</h1>
+    <div class="subtitle">Удаленное управление</div>
+    <input type="password" id="pass" placeholder="Введите пароль">
     <div class="buttons">
         <button class="btn btn-start" onclick="run('start')">СТАРТ</button>
         <button class="btn btn-stop" onclick="run('stop')">СТОП</button>
     </div>
-
     <div class="status-bar" id="status-box">
         <div class="status-main" id="status-color-box">
             <input type="checkbox" id="checkbox" disabled>
-            <span id="status-text">Ожидание...</span>
+            <span id="status-text">Загрузка...</span>
         </div>
-        <div class="players-online" id="players-row" style="display: none;">
-            Игроков в сети: <span id="p-count">0/0</span>
+        <div class="players-row" id="players-info" style="display: none;">
+            Игроков: <span id="p-count">0/0</span>
+            <div id="p-names" class="names-list"></div>
         </div>
     </div>
 </div>
 
 <script>
-    // Загрузка данных
-    document.getElementById('api-url').value = localStorage.getItem('mc_url_v2') || '';
-    document.getElementById('pass').value = localStorage.getItem('mc_pass_v2') || '';
-
-    function getUrl() {
-        return document.getElementById('api-url').value.trim().replace(/\/$/, "");
-    }
+    const API_URL = 'https://convenience-gasoline-sense-document.trycloudflare.com'; // ----------------------------------------------------------------------------------------------------
 
     async function run(cmd) {
-        const url = getUrl();
         const pass = document.getElementById('pass').value;
-        localStorage.setItem('mc_url_v2', url);
-        localStorage.setItem('mc_pass_v2', pass);
-
-        const text = document.getElementById('status-text');
-        text.innerText = "Отправка...";
-
         try {
-            const res = await fetch(`${url}/${cmd}`, {
-                method: 'POST',
-                headers: { 'Authorization': pass }
-            });
+            const res = await fetch(`${API_URL}/${cmd}`, { method: 'POST', headers: { 'Authorization': pass } });
             const data = await res.json();
-            text.innerText = data.message;
-        } catch (e) {
-            text.innerText = "Ошибка связи";
-        }
+            document.getElementById('status-text').innerText = data.message || "Готово";
+        } catch (e) { document.getElementById('status-text').innerText = "Ошибка связи"; }
     }
 
     async function check() {
-        const url = getUrl();
-        if (!url) return;
-
-        const text = document.getElementById('status-text');
-        const colorBox = document.getElementById('status-color-box');
-        const playersRow = document.getElementById('players-row');
-        const check = document.getElementById('checkbox');
-
         try {
-            const res = await fetch(`${url}/status`);
+            const res = await fetch(`${API_URL}/status`);
             const data = await res.json();
+            const text = document.getElementById('status-text');
+            const colorBox = document.getElementById('status-color-box');
+            const pRow = document.getElementById('players-info');
+            const pNames = document.getElementById('p-names');
+            const check = document.getElementById('checkbox');
 
             if (data.status === 'online') {
-                text.innerText = "Сервер работает!";
+                text.innerText = "Сервер онлайн";
                 colorBox.className = "status-main online";
                 check.checked = true;
-                playersRow.style.display = "block";
+                pRow.style.display = "block";
                 document.getElementById('p-count').innerText = `${data.players}/${data.max}`;
+                pNames.innerText = data.names && data.names.length > 0 ? "В сети: " + data.names.join(", ") : "";
             } else {
                 text.innerText = "Сервер выключен";
                 colorBox.className = "status-main offline";
                 check.checked = false;
-                playersRow.style.display = "none";
+                pRow.style.display = "none";
             }
         } catch (e) {
-            text.innerText = "Нет связи с сервером";
-            colorBox.className = "status-main";
-            check.checked = false;
-            playersRow.style.display = "none";
+            document.getElementById('status-text').innerText = "Нет связи с ПК";
+            document.getElementById('status-color-box').className = "status-main";
         }
     }
-
     setInterval(check, 5000);
     check();
 </script>
-
 </body>
 </html>
