@@ -3,101 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Panel</title>
+    <title>MC Control + Status</title>
     <style>
-        body { background-color: #1a1f2b; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background-color: #242b3d; padding: 40px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); width: 350px; text-align: center; border: 1px solid #323d52; }
-        h1 { font-size: 24px; margin-bottom: 5px; }
-        .subtitle { color: #7a869a; margin-bottom: 30px; font-size: 12px; text-transform: uppercase; }
-        input { width: 100%; background-color: #1a1f2b; border: 2px solid #323d52; padding: 15px; border-radius: 15px; color: white; margin-bottom: 20px; box-sizing: border-box; text-align: center; outline: none; }
-        .buttons { display: flex; gap: 10px; margin-bottom: 25px; }
-        .btn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
-        .btn-start { background: #27ae60; }
-        .btn-stop { background: #e74c3c; }
-        .status-bar { background-color: #1a1f2b; padding: 20px; border-radius: 15px; border: 1px solid #323d52; }
-        .status-text { font-size: 18px; font-weight: bold; }
-        .online { color: #2ecc71; }
-        .offline { color: #e74c3c; }
-        .starting { color: #f1c40f; }
-        .info { font-size: 14px; color: #7a869a; margin-top: 8px; }
+        :root {
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc;
+            --green: #22c55e; --red: #ef4444; --blue: #3b82f6;
+        }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: var(--card); padding: 2rem; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        
+        /* Индикатор статуса */
+        .status-badge {
+            display: inline-flex; align-items: center; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-bottom: 20px; border: 1px solid #334155;
+        }
+        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .online-dot { background-color: var(--green); box-shadow: 0 0 10px var(--green); }
+        .offline-dot { background-color: var(--red); }
+
+        .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .btn { padding: 15px; border: none; border-radius: 12px; cursor: pointer; color: white; font-weight: bold; transition: 0.2s; }
+        .btn:disabled { opacity: 0.4; }
+        .btn-start { background: var(--green); }
+        .btn-stop { background: var(--red); }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; margin-top: 10px; box-sizing: border-box; }
+        #log { margin-top: 20px; font-size: 0.9rem; color: #94a3b8; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h1>MC CONTROL</h1>
-    <div class="subtitle">Управление сервером</div>
+<div class="container">
+    <div id="badge" class="status-badge">
+        <span id="dot" class="dot offline-dot"></span>
+        <span id="status-text">OFFLINE</span>
+    </div>
+    
+    <h1>MC Launcher</h1>
+    <input type="password" id="pass" placeholder="Пароль доступа">
 
-    <input type="password" id="pass" placeholder="Пароль">
-
-    <div class="buttons">
-        <button class="btn btn-start" onclick="run('start')">СТАРТ</button>
-        <button class="btn btn-stop" onclick="run('stop')">СТОП</button>
+    <div class="btns">
+        <button id="b1" class="btn btn-start" onclick="run('start')">ПУСК</button>
+        <button id="b2" class="btn btn-stop" onclick="run('stop')">СТОП</button>
     </div>
 
-    <div class="status-bar">
-        <div id="status-text" class="status-text offline">Нет связи</div>
-        <div id="extra-info" class="info" style="display: none;">
-            Игроков: <span id="p-count">0/0</span>
-            <div id="p-names" style="font-style: italic; font-size: 12px; margin-top: 5px;"></div>
-        </div>
-    </div>
+    <div id="log">Ожидание команд...</div>
 </div>
 
 <script>
-    // === ВАЖНО: ВСТАВЬ СВОЮ ССЫЛКУ НИЖЕ БЕЗ СЛЭША В КОНЦЕ ===
-    const API_URL = 'https://ouc3bziyr.localto.net'; 
+    // ЗАМЕНИ НА СВОЮ ССЫЛКУ ИЗ CLOUDFLARE
+    const API_URL = 'https://dash-dim-herbal-arms.trycloudflare.com';
 
-    const statusText = document.getElementById('status-text');
-    const extraInfo = document.getElementById('extra-info');
-    const pCount = document.getElementById('p-count');
-    const pNames = document.getElementById('p-names');
+    document.getElementById('pass').value = localStorage.getItem('mc_key') || '';
+
+    async function checkStatus() {
+        try {
+            const res = await fetch(`${API_URL}/status`);
+            const data = await res.json();
+            const dot = document.getElementById('dot');
+            const text = document.getElementById('status-text');
+
+            if (data.status === 'online') {
+                dot.className = 'dot online-dot';
+                text.innerText = 'ONLINE';
+                text.style.color = '#22c55e';
+            } else {
+                dot.className = 'dot offline-dot';
+                text.innerText = 'OFFLINE';
+                text.style.color = '#ef4444';
+            }
+        } catch (e) {
+            document.getElementById('status-text').innerText = 'НЕТ СВЯЗИ';
+        }
+    }
 
     async function run(cmd) {
         const pass = document.getElementById('pass').value;
-        statusText.innerText = "Запрос...";
+        localStorage.setItem('mc_key', pass);
+        
         try {
             const res = await fetch(`${API_URL}/${cmd}`, {
                 method: 'POST',
                 headers: { 'Authorization': pass }
             });
             const data = await res.json();
-            alert(data.message); // Показывает ответ (например: "Запуск...")
+            document.getElementById('log').innerText = data.message;
         } catch (e) {
-            alert("Ошибка соединения");
+            document.getElementById('log').innerText = "Ошибка сети";
         }
     }
 
-    async function check() {
-        try {
-            const res = await fetch(`${API_URL}/status`);
-            const data = await res.json();
-
-            // Логика обработки твоего JSON: {"status":"offline", "players":0, ...}
-            if (data.status === 'online') {
-                statusText.innerText = "ОНЛАЙН";
-                statusText.className = "status-text online";
-                extraInfo.style.display = "block";
-                pCount.innerText = data.players + " / " + data.max;
-                pNames.innerText = data.names.length > 0 ? data.names.join(", ") : "";
-            } else if (data.status === 'starting') {
-                statusText.innerText = "ЗАПУСК...";
-                statusText.className = "status-text starting";
-                extraInfo.style.display = "none";
-            } else {
-                statusText.innerText = "ВЫКЛЮЧЕН";
-                statusText.className = "status-text offline";
-                extraInfo.style.display = "none";
-            }
-        } catch (e) {
-            statusText.innerText = "НЕТ СВЯЗИ";
-            statusText.className = "status-text offline";
-            extraInfo.style.display = "none";
-        }
-    }
-
-    setInterval(check, 5000);
-    check();
+    // Проверять статус каждые 5 секунд
+    setInterval(checkStatus, 5000);
+    // И один раз при загрузке
+    checkStatus();
 </script>
+
 </body>
 </html>
